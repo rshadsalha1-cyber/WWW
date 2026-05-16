@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>تطبيق هيا نقرأ</title>
+    <!-- Local Assets for Offline Support -->
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a5ab5">
+</head>
+
+<body>
+    <!-- Global Toast Notification -->
+    <div id="global-toast" class="toast-container">
+        <div class="toast-content">
+            <i class="fa-solid fa-circle-check"></i>
+            <span class="toast-text">تمت العملية بنجاح!</span>
+        </div>
+    </div>
+    <div id="offline-screen" class="offline-overlay hidden">
+        <i class="fa-solid fa-wifi-slash" style="font-size: 60px; color: #EF4444; margin-bottom: 20px;"></i>
+        <h2 style="font-size: 24px; font-weight: 900;">عذراً.. لا يوجد اتصال!</h2>
+        <p style="margin: 15px 0; color: #CBD5E1;">هذا التطبيق يتطلب اتصالاً بالإنترنت للتعرف على الصوت (الذكاء
+            الاصطناعي).</p>
+        <button onclick="window.location.reload()" class="primary-btn modern-btn"
+            style="width: auto; padding: 10px 30px;">إعادة المحاولة</button>
+    </div>
+    <div class="app-container">
+        <!-- 1. شاشة البداية والتسجيل -->
+        <div id="splash-screen" class="screen active splash-redesign">
+            <div class="cloud cloud-1"></div>
+            <div class="cloud cloud-2"></div>
+            <i class="fa-solid fa-book-open deco-icon deco-book"></i>
+            <i class="fa-solid fa-pen deco-icon deco-pencil"></i>
+            <i class="fa-solid fa-star star-1"></i>
+            <i class="fa-solid fa-star star-2"></i>
+            <i class="fa-solid fa-star star-3"></i>
+            <i class="fa-solid fa-heart deco-heart"></i>
+            <div class="splash-content splash-redesign-content">
+                <div class="app-logo-container">
+                    <img src="assets/lo.png" alt="شعار هيا نقرأ" class="app-logo-main">
+                </div>
+                <h2 class="splash-title">أهلاً بك يا بطل!</h2>
+                <div class="name-input-container" id="name-input-wrapper">
+                    <i class="fa-solid fa-user-pen"></i>
+                    <input type="text" id="student-name-input" placeholder="اكتب اسمك هنا..." autocomplete="off">
+                </div>
+                <div id="name-display-view" class="name-display-view hidden">
+                    <div id="display-name" class="student-name-text"></div>
+                </div>
+                <button id="start-app-btn" class="primary-btn modern-btn">
+                    ابدأ الرحلة <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <div class="footer-text">
+                    أستــــــــاذ إبــــــــداع <br>
+                    أ. رشاد عاطف محمد صالحة <br>
+                    أ. أحلام صامد حسن الغندور عبد الله
+                </div>
+            </div>
+        </div>
+        <!-- 2. المكتبة والدروس -->
+        <div id="gallery-screen" class="screen">
+            <header class="top-bar">
+                <div class="header-profile-card">
+                    <div class="hp-user-info">
+                        <span class="hp-greeting">مرحباً بك يا،</span>
+                        <span id="hp-student-name" class="hp-name">بطلنا</span>
+                    </div>
+                    <div class="hp-score-section">
+                        <span id="hp-global-score">0</span>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                </div>
+            </header>
+            <div class="gallery-content">
+                <h2 class="gallery-title">مكتبة الدروس <i class="fa-solid fa-sparkles"></i></h2>
+                <div id="lessons-grid" class="lessons-grid"></div>
+            </div>
+        </div>
+        <!-- 3. شاشة القراءة -->
+        <div id="reading-screen" class="screen reading-bg">
+            <header class="reading-header banner-header">
+                <button class="icon-btn back-btn" id="back-to-gallery-btn"><i
+                        class="fa-solid fa-arrow-right"></i></button>
+                <div class="header-status">
+                    <div class="reading-global-score-badge">
+                        <i class="fa-solid fa-star"></i>
+                        <span id="reading-global-score">0</span>
+                    </div>
+                </div>
+            </header>
+            <div class="reading-container">
+                <div class="reading-title-card">
+                    <h2 id="reading-title" class="reading-title">عنوان الدرس</h2>
+                </div>
+                <div class="reading-content-card">
+                    <div id="text-canvas" class="text-canvas"></div>
+                </div>
+            </div>
+            <div class="reading-controls">
+                <button id="tts-btn" class="control-btn tts-btn"><i class="fa-solid fa-volume-high"></i></button>
+                <div class="mic-controls-group">
+                    <div class="mic-wrapper">
+                        <button id="mic-btn" class="mic-btn"><i class="fa-solid fa-microphone"></i></button>
+                        <div class="mic-pulse"></div>
+                    </div>
+                    <button id="end-session-btn" class="end-session-btn-modern">
+                        <i class="fa-solid fa-flag-checkered"></i> إنهاء الجلسة
+                        <div class="reading-progress-container button-progress">
+                            <div class="reading-progress-bar" id="reading-progress-bar"></div>
+                        </div>
+                    </button>
+                </div>
+                <button id="retry-btn" class="control-btn retry-btn"><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+        </div>
+    <!-- 4. لوحة المتصدرين -->
+    <div id="leaderboard-screen" class="screen padded-screen layout-screen">
+        <header class="leaderboard-header">
+            <div class="leaderboard-title-group">
+                <i class="fa-solid fa-crown crown-icon"></i>
+                <h2>لوحة المتصدرين</h2>
+            </div>
+        </header>
+        <div id="leaderboard-list" class="leaderboard-list"></div>
+    </div>
+    <!-- 5. الملف الشخصي -->
+    <div id="profile-screen" class="screen padded-screen layout-screen">
+        <header class="screen-header profile-header">
+            <div class="profile-avatar-container">
+                <div class="profile-avatar" id="profile-avatar-display">
+                    <i class="fa-solid fa-user-graduate" id="profile-avatar-icon"></i>
+                    <img id="profile-avatar-img" alt="صورة الطالب" class="hidden profile-avatar-photo">
+                </div>
+                <button class="edit-name-btn" onclick="toggleNameEditCloud(true)"><i
+                        class="fa-solid fa-pen-to-square"></i></button>
+                <button class="upload-photo-btn" id="upload-photo-btn" title="رفع صورة شخصية"><i
+                        class="fa-solid fa-camera"></i></button>
+            </div>
+            <input type="file" id="photo-upload-input" accept="image/*"
+                style="opacity: 0; position: absolute; width: 0; height: 0; pointer-events: none;">
+            <h2 id="profile-student-name">بطلنا</h2>
+            <div class="user-score-badge">
+                <i class="fa-solid fa-star"></i>
+                <span id="profile-global-score">0</span>
+            </div>
+            <button class="settings-gear-btn" onclick="toggleSettings(true)" title="الإعدادات">
+                <i class="fa-solid fa-gear"></i>
+            </button>
+        </header>
+
+        <!-- Settings Overlay -->
+        <div id="settings-overlay" class="settings-overlay hidden">
+            <div class="settings-modal">
+                <div class="settings-modal-header">
+                    <h3>إعدادات التطبيق <i class="fa-solid fa-sliders"></i></h3>
+                    <button class="close-settings-btn" onclick="toggleSettings(false)">&times;</button>
+                </div>
+                <div class="settings-modal-body">
+                    <!-- اختيار محرك التعرف الصوتي -->
+                    <div class="settings-row-vertical">
+                        <div class="settings-label-group">
+                            <i class="fa-solid fa-microphone-lines"></i>
+                            <span>محرك التعرف على الصوت:</span>
+                        </div>
+                        <div class="engine-selector-buttons">
+                            <button id="engine-google-btn" class="engine-opt-btn" onclick="changeSpeechEngine('google')">
+                                <i class="fa-brands fa-google"></i> أونلاين (جوجل)
+                            </button>
+                            <button id="engine-vosk-btn" class="engine-opt-btn active" onclick="changeSpeechEngine('vosk')">
+                                <i class="fa-solid fa-cloud-slash"></i> أوفلاين (Vosk)
+                            </button>
+                        </div>
+                        <p class="settings-hint">استخدم "أوفلاين" في حال عدم توفر إنترنت أو لسرعة استجابة أكبر.</p>
+                    </div>
+                    <div class="settings-row-vertical">
+                        <div class="settings-label-group">
+                            <i class="fa-solid fa-brain"></i>
+                            <span>أسلوب التعلم (فلسفة القراءة):</span>
+                        </div>
+                        <div class="philosophy-selector">
+                            <select id="philosophy-select" class="modern-select"
+                                onchange="changePhilosophy(this.value)">
+                                <option value="standard">المباشر (تصحيح وتجاوز فوري)</option>
+                                <option value="patient">المعلم الصبور (إعطاء فرصتين للكلمة)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="font-zoom-row">
+                        <div class="settings-label-group">
+                            <i class="fa-solid fa-font"></i>
+                            <span>حجم خط القراءة:</span>
+                        </div>
+                        <div class="zoom-controls">
+                            <button onclick="changeFontSize(-4)">-</button>
+                            <span id="current-font-size">28</span>
+                            <button onclick="changeFontSize(4)">+</button>
+                        </div>
+                    </div>
+                </div>
+                <button class="primary-btn modern-btn" onclick="toggleSettings(false)" style="margin-top: 20px;">حفظ
+                    وإغلاق</button>
+            </div>
+        </div>
+
+        <button id="share-achievement-btn" class="share-achievement-btn" onclick="shareAchievement()">
+            <i class="fa-solid fa-share-nodes"></i> مشاركة الإنجاز
+        </button>
+        <div class="history-card">
+            <h3>سجل القراءات <i class="fa-solid fa-clock-rotate-left"></i></h3>
+            <div id="history-list" class="history-list"></div>
+        </div>
+    </div>
+    <!-- Result Overlay (Honor Board - Proposal 3) -->
+    <div id="lesson-result-overlay" class="result-overlay hidden">
+        <div class="honor-board-card">
+            <div class="stars-explosion" id="stars-explosion"></div> <!-- حاوية النجوم المتطايرة -->
+            <div class="honor-icon-wrapper">
+                <div class="main-medal">🏆</div>
+            </div>
+
+            <h2 class="honor-title">لوحة شرف الأبطال</h2>
+            <p id="result-message" class="honor-subtitle">أنت قارئ عبقري ومتميز!</p>
+
+            <div class="honor-stats-grid">
+                <div class="stat-item-circle">
+                    <svg viewBox="0 0 36 36" class="circular-chart green">
+                        <path class="circle-bg"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path id="result-progress-path" class="circle" stroke-dasharray="0, 100"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <text x="18" y="20.35" class="percentage" id="result-percentage">0%</text>
+                    </svg>
+                    <span class="stat-label">دقة القراءة</span>
+                </div>
+
+                <div class="stat-item-points">
+                    <div class="points-star-wrapper">
+                        <i class="fa-solid fa-star big-result-star"></i>
+                        <div class="points-content">
+                            <span id="result-session-total">0</span>
+                            <small>نقطة</small>
+                        </div>
+                    </div>
+                    <span class="stat-label">مجموع النجوم</span>
+                </div>
+
+                <!-- ميزة الوقت المستغرق الجديدة -->
+                <div class="stat-item-time">
+                    <div class="time-circle">
+                        <i class="fa-solid fa-stopwatch"></i>
+                        <span id="result-time-taken">0:00</span>
+                    </div>
+                    <span class="stat-label">الوقت المستغرق</span>
+                </div>
+            </div>
+
+            <div id="mistakes-container" class="mistakes-section hidden">
+                <h3>كلمات تحتاج للتدريب عليها:</h3>
+                <div id="result-mistakes" class="mistakes-list"></div>
+            </div>
+
+            <div class="honor-actions">
+                <button id="close-result-btn" class="honor-btn pulse">استمر في الإبداع ✨</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Motivational Audio -->
+    <audio id="motivation-sound" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"
+        preload="auto"></audio>
+    <!-- Popup: تعديل الاسم -->
+    <div id="name-edit-cloud" class="cloud-alert-overlay hidden">
+        <div class="cloud-alert-body name-edit-body">
+            <div class="cloud-shape">
+                <button class="close-cloud-btn" onclick="toggleNameEditCloud(false)">×</button>
+                <i class="fa-solid fa-user-pen"></i>
+                <p>تعديل اسمك</p>
+                <input type="text" id="new-name-input" class="modern-input" placeholder="اكتب اسمك الجديد...">
+                <button id="save-new-name-btn" class="primary-btn modern-btn small-btn">حفظ التغيير</button>
+            </div>
+        </div>
+    </div>
+    <!-- 6. آفاق المستقبل والدعم -->
+    <div id="future-screen" class="screen padded-screen layout-screen">
+        <header class="screen-header future-header">
+            <i class="fa-solid fa-rocket future-main-icon"></i>
+            <h2>آفاق المستقبل</h2>
+            <p>رحلتنا مستمرة.. كن شريكاً في الإبداع</p>
+        </header>
+
+        <div class="future-content">
+            <!-- المميزات القادمة -->
+            <section class="future-section">
+                <h3>مميزات قادمة قريباً <i class="fa-solid fa-star"></i></h3>
+                <div class="future-cards">
+                    <div class="future-card">
+                        <i class="fa-solid fa-book-atlas"></i>
+                        <div class="fc-text">
+                            <strong>قاموس المفردات الذكي</strong>
+                            <p>شرح معاني الكلمات والمهارات اللغوية لكل درس.</p>
+                        </div>
+                    </div>
+                    <div class="future-card">
+                        <i class="fa-solid fa-ear-listen"></i>
+                        <div class="fc-text">
+                            <strong>الاستماع التفاعلي</strong>
+                            <p>قراءة الدروس بصوت احترافي مع تظليل النص المقروء.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- الاقتراحات -->
+            <section class="future-section">
+                <h3>شاركنا رأيك <i class="fa-solid fa-lightbulb"></i></h3>
+                <div class="suggestion-box">
+                    <textarea id="suggestion-text" placeholder="اكتب اقتراحك هنا يا بطل..."></textarea>
+                    <button onclick="sendSuggestion()" class="primary-btn modern-btn small-btn">إرسال
+                        الاقتراح</button>
+                </div>
+            </section>
+
+            <!-- دعم الفكرة -->
+            <section class="future-section support-section">
+                <h3>دعم استمرارية الفكرة <i class="fa-solid fa-hand-holding-dollar"></i></h3>
+                <div class="support-card">
+                    <p>مساهمتك المالية تساعدنا في تطوير التطبيق وتوفير أفضل الوسائل لطلابنا.</p>
+                    <div class="payment-methods">
+                        <div class="payment-item">
+                            <span class="pm-label">بنك فلسطين / PalPay / جوال بي:</span>
+                            <div class="pm-value-group">
+                                <span class="pm-value" id="account-number">00972595918328</span>
+                                <button class="copy-btn" onclick="copyToClipboard('00972595918328')"><i
+                                        class="fa-regular fa-copy"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- التواصل الاجتماعي -->
+            <section class="future-section social-section">
+                <h3>تواصل مع أستاذ إبداع <i class="fa-solid fa-link"></i></h3>
+                <div class="social-links-grid">
+                    <a href="https://www.youtube.com/@RashadSalha" target="_blank" class="social-link yt"><i
+                            class="fa-brands fa-youtube"></i></a>
+                    <a href="https://www.facebook.com/rshad0/" target="_blank" class="social-link fb"><i
+                            class="fa-brands fa-facebook-f"></i></a>
+                    <a href="https://www.instagram.com/rashad_salha/" target="_blank" class="social-link ig"><i
+                            class="fa-brands fa-instagram"></i></a>
+                    <a href="https://wa.me/972595918328" target="_blank" class="social-link wa"><i
+                            class="fa-brands fa-whatsapp"></i></a>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav id="bottom-nav" class="bottom-nav hidden">
+        <button class="nav-item" data-target="profile-screen">
+            <i class="fa-regular fa-user"></i>
+            <span>ملفي</span>
+        </button>
+        <button class="nav-item" data-target="future-screen">
+            <i class="fa-solid fa-rocket"></i>
+            <span>آفاق</span>
+        </button>
+        <button class="nav-item" data-target="leaderboard-screen">
+            <i class="fa-solid fa-ranking-star"></i>
+            <span>الأوائل</span>
+        </button>
+        <button class="nav-item active" data-target="gallery-screen">
+            <i class="fa-solid fa-house"></i>
+            <span>الرئيسية</span>
+        </button>
+    </nav>
+    </div> <!-- نهاية app-container -->
+    <!-- Audios -->
+    <audio id="success-sound" src="assets/audio/success.mp3" preload="auto"></audio>
+    <audio id="error-sound" src="assets/audio/wrong.mp3" preload="auto"></audio>
+    <audio id="cheer-sound" src="assets/audio/correct.mp3" preload="auto"></audio>
+    <audio id="bg-music" src="assets/audio/s.mp3" loop></audio>
+
+    <!-- Global Toast Notification -->
+    <div id="global-toast" class="toast-container">
+        <div class="toast-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+        <div class="toast-text">قريباً...</div>
+    </div>
+
+    <script src="assets/lib/confetti.js"></script>
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

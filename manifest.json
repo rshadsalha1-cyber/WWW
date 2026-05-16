@@ -1,0 +1,21 @@
+{
+  "name": "تطبيق القراءة التفاعلي",
+  "short_name": "اقرأ معي",
+  "description": "تطبيق تفاعلي لتعليم القراءة لطلاب الصف الثالث الابتدائي - المنهج الفلسطيني",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#e0f2fe",
+  "theme_color": "#1a5ab5",
+  "icons": [
+    {
+      "src": "assets/lo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/lo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
